@@ -1,0 +1,1 @@
+http://bulksmsgateway.co.in/sms_api/sendsms.php?username=bamatrimony&password=bamatrimony&mobile=7402058490&sendername=SMSPRO&routetype=0&message=Hai
