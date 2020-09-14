@@ -28,6 +28,14 @@ $username = $this->session->userdata('username');?>
    <ul class="sidebar-menu"   style="color:red;font-size:20px;background-color: white;"  data-widget="tree">
         <li class="header">MAIN NAVIGATION</li>
 		<?php if($admin==0) { ?> 
+      <li>
+          <a href="<?php echo base_url(); ?>admin/viewalltest">
+            <i class="fa fa-folder"></i> <span>All Projects-Test </span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>         
+        </li>
 		 <li>
           <a href="<?php echo base_url(); ?>billing/outstanding">
             <i class="fa fa-folder"></i> <span>Outstanding</span>
@@ -146,6 +154,14 @@ $username = $this->session->userdata('username');?>
           </a>         
         </li>
         <li>
+          <a href="<?php echo base_url(); ?>billing/outstandingtest">
+            <i class="fa fa-folder"></i> <span>OS-Testing</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>         
+        </li> 
+        <li>
           <a href="<?php echo base_url(); ?>billing/outstanding">
             <i class="fa fa-folder"></i> <span>Outstanding</span>
             <span class="pull-right-container">
@@ -163,7 +179,6 @@ $username = $this->session->userdata('username');?>
           </a> </li>
 		  
          <li>		  
-        
 		 <a href="<?php echo base_url(); ?>billing/createbill">
             <i class="fa fa-folder"></i> <span>Billing</span>
             <span class="pull-right-container">
@@ -171,6 +186,15 @@ $username = $this->session->userdata('username');?>
             </span>
           </a>         
         </li>
+        <li>		  
+		 <a href="<?php echo base_url(); ?>billing/billingnew">
+            <i class="fa fa-folder"></i> <span>Billing-Add New</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>         
+        </li>
+
 		<li>
           <a href="<?php echo base_url(); ?>billing/createbillshort">
             <i class="fa fa-folder"></i> <span>Billing-Digital Sign</span>
@@ -191,6 +215,14 @@ $username = $this->session->userdata('username');?>
 		  <li>
           <a href="<?php echo base_url(); ?>billing/notbilledyet">
             <i class="fa fa-folder"></i> <span>Billed-Work Not Completed</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>         
+        </li>
+        <li>
+          <a href="<?php echo base_url(); ?>admin/viewalltest">
+            <i class="fa fa-folder"></i> <span>All Projects-Test </span>
             <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>

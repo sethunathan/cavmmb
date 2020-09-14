@@ -249,23 +249,25 @@ function saveaccounts()
 	var bill_date=$('#bill_date').val();
 	var bill_no=$('#bill_no').val();
 	var vch_no=$('#vch_no').val();
+	var yearid=$('#yearid').val();
 	var netval=$('#netval').val();
 	var remarks=$('#remarks').val();
 	var accodefrom=$('#accodefrom').val();
 	var accodeto=$('#accodeto').val();
     var roundoff=$('#roundoff').val();	 	
-	
+	// alert(yearid);
 	var comp_idd = $("input[name='comp_idd']:checked").val();
 	 
 	$.ajax({
 		        url: '<?php echo site_url("billing/savebilledit")?>',
 		        type:'POST',
 				async: false,
-				data:{netval:netval,bill_no:bill_no,roundoff:roundoff,
+				data:{netval:netval,bill_no:bill_no,roundoff:roundoff,yearid:yearid,
 				vch_no:vch_no,bill_date:bill_date,remarks:remarks,accodefrom:accodefrom,accodeto:accodeto,comp_idd:comp_idd,tabledata:tabledata},
 		        success:function(response){
 					$("#accavail").html(response);
-					 //result=response;
+					result=response;
+					alert(result)
 					// $(".entryscreen").hide();
 	                // $(".mainscreen").show();
 	               //  $("#entry").show();
@@ -278,6 +280,7 @@ function saveaccounts()
           }
 		
 	});
+	window.location.replace("http://cavmmb.com/billing/modifybill");  
 	
 }
  
@@ -287,7 +290,7 @@ function saveaccounts()
 <body style="background: burlywood" class="hold-transition register-page">
  <div class="register-boxx">
   <div class="register-logo">
-    <button type="button" id="main"  class="btnDeleteAction" ><a href="<?php echo base_url(); ?>admin/main"><b>Back</b></a></button> 
+  <button type="button" id="main"  class="btnDeleteAction" ><a href="<?php echo base_url(); ?>billing/modifybill"><b>Billing</b></a></button> 
 </div>
 	
 	<div class="container">
@@ -301,6 +304,7 @@ function saveaccounts()
 			  $remarks=$rsbilling['remarks'];
 			  $comp_id=$rsbilling['comp_id'];
 			  $pty_code=$rsbilling['pty_code'];
+			  $yearid=$rsbilling['yearid'];
 			  $service_code=$rsbilling['service_code'];
 			  $netval=$rsbilling['netval'];
 			  $roundoff=$rsbilling['roundoff'];
@@ -319,6 +323,12 @@ function saveaccounts()
 				<td>
 				  <input   class="form-control" readonly  value="<?php echo $vch_no?>"  name="vch_no" id="vch_no" ><br></input> 
 			    </td>
+		</tr>
+		<tr>
+			<td><label>Year #:<label></td>
+				<td>
+				  <input type="text"  class="form-control" readonly  value="<?php echo $yearid?>"  name="yearid" id="yearid" ><br></input> 
+			    </td> 
 		</tr>
 		<tr>
 			<td><label>Bill Date:<label></td>

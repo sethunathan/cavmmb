@@ -4,25 +4,43 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Billing extends CI_Controller {
 	function __construct()
     {
+		//update trnbilling1 set billdatelong=concat( mid(bill_date,7,4),mid(bill_date,4,2),mid(bill_date,1,2)) where vch_no=489
+		//mid(bill_date,4,2)
 		//$this->output->set_header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
         //$this->output->set_header('Pragma: no-cache');
         //$this->output->set_header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
         parent::__construct();
-      error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
+    //  error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
         $this->load->library('session');	  
         $this->load->helper('url');
-        if (!$this->session->userdata('loggedin'))
-        {	
-			$target= base_url().'login';
-            header("Location: " . $target);
-        }
+	  
+		
+		
 		date_default_timezone_set('Asia/Kolkata');
         
-    }
+	}
+	public function createbill()
+	{ 
+
+		// echo 'test';
+         $this->load->view("createbill");
+		 
+	}
+	public function billingnew()
+	{  
+         $this->load->view("createbillnew");
+		 
+	}
 	public function outstanding()
 	{
-		$date1=$this->input->post('datepicker1');
-        $date2=$this->input->post('datepicker2');	
+		 $date1=$this->input->post('datepicker1'); 
+		$date2=$this->input->post('datepicker2');	
+		
+		 $dateone=substr($date1,6,4).substr($date1,3,2).substr($date1,0,2);		 
+		 $datetwo=substr($date2,6,4).substr($date2,3,2).substr($date2,0,2);
+		 $this->db->where('billdatelong >=', $dateone);  $this->db->where('billdatelong <=',$datetwo);
+	  
+
 		$data['date1']=$date1; 
 		$data['date2']=$date1;
 	    $branch_code=$this->session->userdata('branchcode');
@@ -38,7 +56,42 @@ class Billing extends CI_Controller {
            
 		   $data['ac_code'] =-1;	
 		}
-		// $this->db->where('abs(clos_bal) >', 0);
+		 $this->db->where('abs(clos_bal) >', 0);
+        $this->db->where("clos_bal<>",0);		 
+		//$this->db->where('ac_code', $accode);
+		$this->db->where('group_code', $branch_code);
+		$this->db->order_by('abs(clos_bal)','desc');
+		$this->db->select('ac_code,tot_dr,tot_cr,ac_name,contactno,opn_bal,clos_bal');  
+        $this->db->from('accmasaccounts'); 
+	    $data['client']=$this->db->get()->result_array();;
+        $this->load->view('billingostest',$data);		
+	}
+	public function outstandingtest()
+	{
+		 $date1=$this->input->post('datepicker1'); 
+		$date2=$this->input->post('datepicker2');	
+		
+		 $dateone=substr($date1,6,4).substr($date1,3,2).substr($date1,0,2);		 
+		 $datetwo=substr($date2,6,4).substr($date2,3,2).substr($date2,0,2);
+		 $this->db->where('billdatelong >=', $dateone);  $this->db->where('billdatelong <=',$datetwo);
+	  
+
+		$data['date1']=$date1; 
+		$data['date2']=$date1;
+	    $branch_code=$this->session->userdata('branchcode');
+        $accode=0;
+		$this->getclosbalall();			   
+		 if (isset($_POST['ac_code']))
+		{
+            	   $data['ac_code'] =$_POST["ac_code"]; 
+				   $accode =$_POST["ac_code"]; 
+		}		
+        else
+        {		
+           
+		   $data['ac_code'] =-1;	
+		}
+		 $this->db->where('abs(clos_bal) >', 0);
         $this->db->where("clos_bal<>",0);		 
 		//$this->db->where('ac_code', $accode);
 		$this->db->where('group_code', $branch_code);
@@ -54,11 +107,17 @@ class Billing extends CI_Controller {
         $id=$_POST["id"];  
         $strSQL ="update trntask2 set billed=1   where id='".$id."'";
 		$this->db->query($strSQL);   
+	}
+	public function saveremarks() 
+	{
+        $id=$_POST["id"]; 
+        $strSQL ="update trntask2 set remarks='".$_POST["remarks"]."'    where id='".$id."'";	
+	    $this->db->query($strSQL);      
 	}	
 	public function unbilled()
 	{
 	    
-		$this->getclosbalall();	
+		//$this->getclosbalall();	
 		$groupcode=7;
         $billed=1;
 		 if (isset($_POST['accgroup']))
@@ -108,8 +167,8 @@ class Billing extends CI_Controller {
 	}
 	public function getmaxacc()
 	{
-		$billno = 0;
-		$row = $this->db->query("SELECT MAX(bill_no) AS `maxid` FROM trnbilling1 where comp_id=1")->row();
+		$billno = 0;$yearid = 2;
+		$row = $this->db->query("SELECT MAX(bill_no) AS `maxid` FROM trnbilling1 where comp_id=1 and yearid=$yearid")->row();
 		echo $billno = $row->maxid+1; 
 	}
 	public function modifybillshort()
@@ -125,7 +184,7 @@ class Billing extends CI_Controller {
 		//$this->db->where('MONTH(bill_date)',  date($billmonth));
 		$this->db->order_by('trnbilling1.bill_no,trnbilling1.bill_date');
 		$this->db->where('trnbilling1.typee', 1); 
-	    $this->db->select('trnbilling1.vch_no,trnbilling1.bill_no,trnbilling1.pty_code,ac_name,netval,remarks,trnbilling1.bill_date,trnbilling1.comp_id');  
+	    $this->db->select('trnbilling1.vch_no,trnbilling1.bill_no,trnbilling1.pty_code,ac_name,netval,remarks,trnbilling1.bill_date,trnbilling1.comp_id,yearid');  
         $this->db->from('trnbilling1');
 		$this->db->join('accmasaccounts', 'accmasaccounts.ac_code = trnbilling1.pty_code');
 	    $data['records']=$this->db->get();	
@@ -134,23 +193,43 @@ class Billing extends CI_Controller {
 	}
 	public function modifybill()
 	{
-			
-		if(!empty($_POST["monthn"])) 
-		 {  
- 		     //$billmonth=$_POST["monthn"];		   
-		}
-		else { //$billmonth=date('n');
-		} 
-	     
+	 
+	
+		$billmonth=$_POST["monthn"];//$date1=$_POST["datepicker1"];$date2=$_POST["datepicker2"];	
 		
-		//$this->db->where('MONTH(bill_date)',  $billmonth);
-		$this->db->order_by('bill_no,bill_date');
+		if(!empty($_POST["datepicker1"])) 
+		{  
+			$date1=$_POST["datepicker1"] ;$date2=$_POST["datepicker2"];    
+		}
+		else { 
+			$today = date("d/m/Y");    
+			$date1=$today; $date2=$today;
+		} 
+
+        $this->session->set_userdata('date1',$date1);
+		$this->session->set_userdata('date2',$date2);
+		
+		$dateone=substr($date1,6,4).substr($date1,3,2).substr($date1,0,2);
+		
+		$datetwo=substr($date2,6,4).substr($date2,3,2).substr($date2,0,2);
+        $comp_id=$_POST["comp_idd"];	
+			
+		  
+		 
+		 $yearid=$_POST["yearidd"];
+		 $this->db->where('billdatelong >=', $dateone);  $this->db->where('billdatelong <=',$datetwo);
+	  
+		$this->db->where('comp_id',  $comp_id);
+		$this->db->order_by(' bill_no,bill_date');
 		$this->db->where('typee', 0); 
-	    $this->db->select('roundoff,vch_no,bill_no,pty_code,ac_name,netval,remarks,bill_date,comp_id');  
+		$this->db->where('yearid', $yearid);
+	    $this->db->select('roundoff,vch_no,bill_no,pty_code,ac_name,netval,remarks,bill_date,comp_id,yearid,billnoprint');  
         $this->db->from('trnbilling1');
 		$this->db->join('accmasaccounts', 'accmasaccounts.ac_code = trnbilling1.pty_code');
-	    $data['records']=$this->db->get();	
-		$data['monthn']=$billmonth;	
+		$data['records']=$this->db->get();	
+		//print_r($this->db->last_query());
+	 
+		$data['date1']=$date1;	$data['date2']=$date2;	
 	 	$this->load->view('createbill',$data); 
 	}
 	public function newbill() {
@@ -158,11 +237,12 @@ class Billing extends CI_Controller {
 		$ac_code= $_POST['ac_code'];
         $this->db->where('ac_code', $ac_code);
 		$comp_id= $_POST['comp_id'];
+		$yearid= $_POST['yearid'];;
 		$this->db->select('ac_name,ac_code,address,contactno,email,gst ')  ;	   
 	    $data['masaccounts'] = $this->db->get('accmasaccounts')->result_array();      
 
         $billno = 1;			
-        $row = $this->db->query("SELECT MAX(bill_no) AS  maxid FROM trnbilling1 where comp_id=$comp_id")->row();
+        $row = $this->db->query("SELECT MAX(bill_no) AS  maxid FROM trnbilling1 where comp_id=$comp_id and yearid=$yearid")->row();
         if ($row)
 			{
 				
@@ -182,7 +262,7 @@ class Billing extends CI_Controller {
 		
         $this->db->order_by('trntask2.task_code,task_name');  	
         $this->db->where('billed', 0);		  		
-		$this->db->where_in('accmasaccounts.ac_code', $accode);		  
+		$this->db->where('accmasaccounts.ac_code', $accode);		  
 		$this->db->select('task_name,ac_name,trntask2.ac_code,sac,taxper,amount,
 		trntask2.task_code,accmasaccounts.contactno,trntask2.remarks,trntask2.id   ');
 		  
@@ -195,8 +275,9 @@ class Billing extends CI_Controller {
         $this->load->view("newbill",$data);
 		
     }
-	public function index()
+	public function mex()
 	{
+	
 		$this->load->view('createbill.php');	
 		
 	}
@@ -205,12 +286,7 @@ class Billing extends CI_Controller {
 		$this->load->view('createbillshort.php');	
 		
 	}
-	public function createbill()
-	{ 
 
-        $this->load->view("createbill");
-		 
-	}
 	 
 	public function getopnbal($ac_code)	
 	{  
@@ -266,26 +342,69 @@ class Billing extends CI_Controller {
 			} 
 		    $this->db->query("update accmasaccounts set tot_cr=$cramount, tot_dr=$dramount, clos_bal=$accamount where  ac_code=". $ac_code."");	   
 		} 
-       
-		
+        
 		
 		return $accamount+$opn_bal;	
+	}
+	public function delete()
+	{ 
+		//select * from trnbilling2 where bill_no=707 and comp_id=1 and yearid=1
+		//select * from trnbilling1 where bill_no=707 and comp_id=1 and yearid=1
+		//select * from accentry where bill_no=707 and comp_id=1 and yearid=1
+		//select * from trntask2 where id in (9570,9967 )  
+	   //update trntask2 set billed=0 where id=9570 and comp_id=1 and yearid=1
+	   
+		$bill_no=$this->uri->segment(3);
+		$comp_id=$this->uri->segment(4);
+		$yearid=$this->uri->segment(5); 
+
+		$this->db->select('id,yearid,comp_id'); 
+		$this->db->where('bill_no',$bill_no);
+		$this->db->where('comp_id',$comp_id);		
+		$this->db->where('yearid',$yearid);	
+		$castxe= $this->db->get('trnbilling2');
+		//print_r($castxe);
+		foreach ($castxe->result() as $airport)
+				{ 
+						 $strSQL =  "update trntask2 set billed=0 where id=$airport->id "; 
+						$this->db->query($strSQL);
+					 
+				}
+
+	    $strSQL =  "delete from trnbilling1 where bill_no=$bill_no and comp_id=$comp_id and  yearid=$yearid ";
+		$this->db->query($strSQL);
+
+		$strSQL =  "delete from trnbilling2 where bill_no=$bill_no and comp_id=$comp_id and  yearid=$yearid ";
+		$this->db->query($strSQL);
+
+		$strSQL =  "delete from accentry where bill_no=$bill_no and comp_id=$comp_id and  yearid=$yearid ";
+		$this->db->query($strSQL); 
+        echo "Deleted!!!".$id;
+		
+
 	}
 	public function billprint()
 
 	{	
 	    $bill_no=$this->uri->segment(3);
         $comp_id=$this->uri->segment(4); 
-        $pty_code=$this->uri->segment(5);   		
+		$pty_code=$this->uri->segment(5);  
+		$yearid=$this->uri->segment(6); 		
 		
 		$this->db->where('bill_no', $bill_no);
         $this->db->where('mascompany.comp_id', $comp_id); 		
              
 		$data['opnbal']=$this->getopnbal($pty_code);	
-		$data['closbal']=$this->getclosbal($pty_code);	
+		$data['closbal']=$this->getclosbal($pty_code);
+		$this->db->where('yearid', $yearid);  
 		
-		
-		$this->db->select('roundoff,bill_no,bill_date,remarks,
+		$tinno=0;
+		////////////////////////////////////////////
+		$rowgst = $this->db->query("SELECT  tin_no FROM accmasaccounts where  ac_code=$pty_code")->row();
+		        
+		$tinno = $rowgst->tin_no;
+		///////////////////////////////////////////
+		$this->db->select('roundoff,bill_no,bill_date,remarks,yearid,billnoprint,taxamt,
 		company_name,mascompany.address1,mascompany.address2,mascompany.mobileno,mascompany.address3,
 		emailid,gstno,state,netval');	        
         $this->db->join('mascompany', 'mascompany.comp_id = trnbilling1.comp_id');			
@@ -293,24 +412,27 @@ class Billing extends CI_Controller {
 
           
 		$this->db->where('bill_no', $bill_no);
-        $this->db->where('comp_id', $comp_id); 		
+		$this->db->where('comp_id', $comp_id); 	
+		$this->db->where('yearid', $yearid); 			
 		$this->db->select('sum(sgst) as sumsgst,sum(rate) as sumrate,taxper,sum(totalamount) as sumtotalamount');
         $this->db->group_by('taxper'); 	    
 	    $data['gstt'] = $this->db->get('trnbilling2')->result_array(); 
 		 
 		
-		$this->db->where('bill_no', $bill_no);  	        
-		$this->db->select('ac_name,clos_bal,address,contactno,gst,email');	        
+		$this->db->where('bill_no', $bill_no); $this->db->where('comp_id', $comp_id); 	$this->db->where('yearid', $yearid); 		 	        
+		$this->db->select('ac_name,gststate,gststatename,clos_bal,address,contactno,gst,email');	        
         $this->db->join('accmasaccounts', 'accmasaccounts.ac_code = trnbilling1.pty_code');			
 	    $data['masaccounts'] = $this->db->get('trnbilling1')->result_array();
         
 		$this->db->where('bill_no', $bill_no);
-        $this->db->where('trnbilling1.comp_id', $comp_id); 
+		$this->db->where('trnbilling1.comp_id', $comp_id); 
+		$this->db->where('yearid', $yearid); 	
 		$this->db->select('bank_name,bank_acno,ifsc');	        
         $this->db->join('masbank', 'masbank.comp_id = trnbilling1.comp_id');			
 	    $data['masbank'] = $this->db->get('trnbilling1')->result_array();
 		
 		$this->db->where('trnbilling2.comp_id', $comp_id); 
+		$this->db->where('yearid', $yearid); 
         $this->db->where('bill_no', $bill_no);  	        
 		$this->db->select('cgst,sgst,gsttaxper,totalamount,trnbilling2.sac,rate,task_name,trnbilling2.amount,trnbilling2.taxper,
 		trnbilling2.taxamt,trnbilling2.task_id,trnbilling2.id');
@@ -318,9 +440,19 @@ class Billing extends CI_Controller {
         $this->db->join('massubjob', 'massubjob.subjob_code = trntask1.subjob_code');			
 	    $data['client'] = $this->db->get('trnbilling2')->result_array();		
 		
+
 		if ($comp_id==1)
 		{
-		   $this->load->view('billprint',$data);	
+			 if($tinno==33)
+			 {
+				$this->load->view('billprint',$data);
+			 }
+			 else
+			 {
+				$this->load->view('billprintcgst',$data);
+			 }
+
+		  	
 		}
 		if ($comp_id==2)
 		{
@@ -332,17 +464,20 @@ class Billing extends CI_Controller {
 	{	
 	    $bill_no=$this->uri->segment(3);  
 		$comp_id=$this->uri->segment(4);
+		$yearid=$this->uri->segment(5);
 		
 		$this->db->where('typee', 0);	
 		$this->db->where('bill_no', $bill_no); 
-        $this->db->where('comp_id', $comp_id);  		
+		$this->db->where('comp_id', $comp_id);  
+		$this->db->where('yearid', $yearid);  			
 		
-		$this->db->select('bill_no,vch_no,comp_id,bill_date,remarks,netval,pty_code,service_code');	 
+		$this->db->select('bill_no,vch_no,comp_id,bill_date,remarks,netval,pty_code,service_code,yearid');	 
 	    $data['billing'] = $this->db->get('trnbilling1')->result_array(); 
 		
 	    $this->db->order_by('indx');  
 		$this->db->where('bill_no', $bill_no); 
-        $this->db->where('comp_id', $comp_id);		
+		$this->db->where('comp_id', $comp_id);	
+		$this->db->where('trnbilling2.yearid', $yearid);  	
 		$this->db->select('task_name,trnbilling2.sac,indx,trnbilling2.rate,trnbilling2.amount,
 		           trnbilling2.gsttaxper,trnbilling2.taxper,trnbilling2.sgst,trnbilling2.cgst,
 				   trnbilling2.taxamt,trnbilling2.totalamount, 
@@ -356,7 +491,9 @@ class Billing extends CI_Controller {
 	{	
 	    $bill_no=$this->uri->segment(3);  
 		$comp_id=$this->uri->segment(4);
+		$yearid=$this->uri->yearid(5);
 		
+		$this->db->where('yearid', $yearid);   
 		$this->db->where('bill_no', $bill_no); 
         $this->db->where('comp_id', $comp_id);  		
 		$this->db->where('typee', 1);
@@ -366,7 +503,8 @@ class Billing extends CI_Controller {
 	    $this->db->order_by('indx'); 
         $this->db->where('typee', 1);		
 		$this->db->where('bill_no', $bill_no); 
-        $this->db->where('comp_id', $comp_id);		
+		$this->db->where('comp_id', $comp_id);
+		$this->db->where('yearid', $yearid);  		
 		$this->db->select('it_name,trnbilling2.rate,trnbilling2.it_code');
         $this->db->join('masitem', 'masitem.it_code = trnbilling2.it_code');
 	    $data['client'] = $this->db->get('trnbilling2')->result_array();
@@ -400,7 +538,7 @@ class Billing extends CI_Controller {
 	{	
 	    $this->db->where('typee', 0);
         $this->db->order_by('bill_date,bill_no');  	        
-		$this->db->select('company_name,trnbilling1.comp_id,ref_no,bill_no,netval,trnbilling1.bill_date,ac_name,remarks');		
+		$this->db->select('company_name,trnbilling1.comp_id,ref_no,bill_no,netval,trnbilling1.bill_date,ac_name,remarks,billnoprint');		
         $this->db->join('accmasaccounts', 'accmasaccounts.ac_code = trnbilling1.pty_code');	
         $this->db->join('mascompany', 'mascompany.comp_id = trnbilling1.comp_id');			
 	    $data['client'] = $this->db->get('trnbilling1')->result_array(); 	  
@@ -429,9 +567,10 @@ class Billing extends CI_Controller {
 	{ 		 
 		$comp_id=$this->input->post("comp_idd");
 		$billdate=date("d-m-Y"); 
+		$yearid=2;
       	if ($comp_id)
 			{
-				$row = $this->db->query("SELECT MAX(bill_no) AS `maxid` FROM trnbilling1 where comp_id=$comp_id")->row();
+				$row = $this->db->query("SELECT MAX(bill_no) AS `maxid` FROM trnbilling1 where comp_id=$comp_id and yeard=$yearid")->row();
 		        
 				$bill_no = $row->maxid+1;
 				$bill_date=date("d-m-Y");
@@ -442,12 +581,13 @@ class Billing extends CI_Controller {
 		        $remarks=$this->input->post("remarks");
 				
 				 
-				$sql = "INSERT INTO trnbilling1 (comp_id,bill_no,typee,bill_date,netval,pty_code,service_code,remarks
+				$sql = "INSERT INTO trnbilling1 (comp_id,bill_no,typee,bill_date,netval,pty_code,yearid,service_code,remarks
 				  ) VALUES ('" . $comp_id . "',
 				  '" . $bill_no . "',
 				  '1','" .$bill_date. "',
 				  '" .$netval. "',				 
 				  '" .$pty_code . "',
+				  '" .$yearid . "',
 				  '" .$service_code. "',				 
 				  '".$remarks."')";
 					 
@@ -468,9 +608,10 @@ class Billing extends CI_Controller {
 					$itcode = $item->itcode;
 					if  ($amount>0 ) {
 						 
-					   $sql = "INSERT INTO trnbilling2(comp_id,indx,typee,bill_no,it_code,bill_date,qty,rate,service_code,pty_code
+					   $sql = "INSERT INTO trnbilling2(comp_id,indx,typee,bill_no,it_code,bill_date,yearid,qty,rate,service_code,pty_code
 					  ) VALUES ('" .$comp_id ."','".$trow. "','1','" .$bill_no."','".$itcode."',
 							  '" . $bill_date."',
+							  '" .$yearid . "',
 							  '" . $qty."',
 							  '" . $amount."',	
 							  '" . $service_code."',
@@ -497,19 +638,89 @@ class Billing extends CI_Controller {
 	  }	
 		
 	}
+	private  function getmax()
+    {
+        $str='000000';$stringlen=0;
+        $retvalue=KnittedFabInward::max('inwardnumber');
+        if ($retvalue === null)
+        {
+            $retvalue=1;
+            $stringlen=1;
+        }
+        elseif ($retvalue >=1)
+        {
+            $stringlen=$retvalue;
+            $retvalue=$retvalue+1;
+        }
+         $stringlen=strlen($retvalue);
+        switch ($stringlen) {
+            case 1:
+            $str='00000';
+                break;
+            case 2:
+            $str='0000';
+                break;
+            case 3:
+            $str='000';
+                break;
+            case 4:
+                $str='00';
+                break;
+            case 5:
+                $str='0';
+                break;  
+            case 6:
+                $str='';
+                break;               
+            default:
+            $str='0';
+        }
+        $retvalue=$str.$retvalue.'/20-21';
+        return $retvalue;
+    }
 	public function savebill()
 
 	{ 		 
-		$comp_id=$this->input->post("comp_idd");
+		$yearid=$this->input->post("yearid");;
+	    $comp_id=$this->input->post("comp_idd");
 		$billdate=date("d-m-Y");
- 		
-       
       	if ($comp_id)
 			{
-				$row = $this->db->query("SELECT MAX(bill_no) AS `maxid` FROM trnbilling1 where comp_id=$comp_id")->row();
+				$row = $this->db->query("SELECT MAX(bill_no) AS `maxid` FROM trnbilling1 where comp_id=$comp_id and yearid=$yearid")->row();
 		        
-				$bill_no = $row->maxid+1;
+				$bill_no = $row->maxid+1;$retvalue=1;
+				//////////////////////////////
+				$str='0000';$stringlen=0;
+				$stringlen=$bill_no;
+				 $stringlen=strlen($bill_no);
+				 switch ($stringlen) { 
+					case 1:
+						$str='000';
+						break;
+					case 2:
+						$str='00';
+						break; 
+					case 3:
+							$str='0';
+							break; 		 
+					case 4:
+						$str='';
+						break;               
+					default:
+					$str='0';
+				}
+				 
+			//	mid(bill_date,4,2)
+				//$mid = $this->db->query("update trnbilling1 set billdatelong=contact() where  bill_no=$bill_no and comp_id=$comp_id ")->row();
+
+			
+
+				$mid = $this->db->query("SELECT prefix FROM masyearr where  year_id=$yearid")->row();
+		        $bill_noprintmid = $mid->prefix; 
+				$billnoprint=$bill_noprintmid.$str.$bill_no ;
+				/////////////////////////////
 				$bill_date=date("d-m-Y");
+				$billdatelong=substr($bill_date,6,4).substr($bill_date,3,2).substr($bill_date,0,2);
 		        $netval=$this->input->post("amount");		        	
 		        $pty_code=$this->input->post("accodefrom");
 				$service_code=$this->input->post("accodeto");				
@@ -517,11 +728,14 @@ class Billing extends CI_Controller {
 				$roundoff=$this->input->post("roundoff");
 				
 				 
-				$sql = "INSERT INTO trnbilling1 (comp_id,bill_no,roundoff,bill_date,netval,pty_code,service_code,remarks
+				$sql = "INSERT INTO trnbilling1 (comp_id,bill_no,billnoprint,yearid,roundoff,bill_date,billdatelong,netval,pty_code,service_code,remarks
 				  ) VALUES ('" . $comp_id . "',
 				  '" . $bill_no . "',
+				  '" . $billnoprint . "',
+				  '" . $yearid . "',
 				  '" . $roundoff . "',
 				  '" . $bill_date . "',
+				  '" . $billdatelong . "',
 				  '" . $netval . "',				 
 				  '" . $pty_code . "',
 				  '" . $service_code . "',				 
@@ -529,7 +743,7 @@ class Billing extends CI_Controller {
 					 
 	            $this->db->query($sql);
 	            
-				$this->insertbilling($netval,$comp_id,$pty_code,$service_code,$bill_no);
+				$this->insertbilling($netval,$comp_id,$pty_code,$service_code,$bill_no,$yearid);
 				$tabledata=$_POST["tabledata"];
 				$decode_data = json_decode($tabledata);
 				 
@@ -553,10 +767,11 @@ class Billing extends CI_Controller {
 						$strSQL ="update trntask2 set billed=1 where id='".$taskid."'";	
 						$this->db->query($strSQL);
 					  
-					   $sql = "INSERT INTO trnbilling2(comp_id,indx,sac,bill_no,bill_date,qty,rate,amount,sgst,cgst,gsttaxper,taxper,taxamt,totalamount,service_code,pty_code,task_id,id
+					   $sql = "INSERT INTO trnbilling2(comp_id,indx,sac,bill_no,bill_date,yearid,qty,rate,amount,sgst,cgst,gsttaxper,taxper,taxamt,totalamount,service_code,pty_code,task_id,id
 					  ) VALUES ('" . $comp_id . "','" . $trow . "','". $sac."',
 					  '" . $bill_no . "',
 					  '" . $bill_date . "',
+					  '" . $yearid . "',
 					  '" . $qty . "',
 					  '" . $rate . "',
 					  '" . $taxableamt . "',
@@ -580,24 +795,24 @@ class Billing extends CI_Controller {
 		
 	}
 	
-	public function insertbilling($amount,$comp_id,$ptycode,$salescode,$bill_no)
+	public function insertbilling($amount,$comp_id,$ptycode,$salescode,$bill_no,$yearid)
 	{
 		 $remarks='';
 		if ($amount > 0) $dramount=-$amount;
 		$reamrks='';
 		$vchcode=$this->getmaxaccinner(); 
 		
-        $strSQL="insert into accentry(ac_code,oppac_code,vch_no,vch_type,comp_id,dr_amt,vchid,remarks,bill_no)  
-	    	values('". $ptycode."','". $salescode."','". $vchcode."','SAL',". $comp_id.",". $dramount.",'1','". $remarks."','". $bill_no."')";   
+        $strSQL="insert into accentry(ac_code,oppac_code,vch_no,vch_type,comp_id,dr_amt,vchid,remarks,bill_no,yearid)  
+	    	values('". $ptycode."','". $salescode."','". $vchcode."','SAL',". $comp_id.",". $dramount.",'1','". $remarks."','". $bill_no."','". $yearid."')";   
 		
 		$result=$this->db->query($strSQL);
 		
-		$strSQL="insert into accentry(ac_code,oppac_code,vch_no,vch_type,comp_id,cr_amt,vchid,remarks,bill_no)  
-		  values('". $salescode."','". $ptycode."','". $vchcode."','SAL','". $comp_id."','". $amount."','2','". $remarks."','". $bill_no."')";   
+		$strSQL="insert into accentry(ac_code,oppac_code,vch_no,vch_type,comp_id,cr_amt,vchid,remarks,bill_no,yearid)  
+		  values('". $salescode."','". $ptycode."','". $vchcode."','SAL','". $comp_id."','". $amount."','2','". $remarks."','". $bill_no."','". $yearid."')";   
 						   
 		$result=$this->db->query($strSQL);
 		
-		$sql = "update trnbilling1  set  vch_no='".$vchcode."'  where comp_id='".$comp_id."' and  bill_no='".$bill_no."'"; 
+		$sql = "update trnbilling1  set  vch_no='".$vchcode."'  where comp_id='".$comp_id."' and yearid='".$yearid."'  and  bill_no='".$bill_no."'"; 
 		
         $this->db->query($sql);	
 	}	
@@ -611,24 +826,52 @@ class Billing extends CI_Controller {
 	}
 	public function savebilledit()
 	{ 		 
-		$comp_id=$this->input->post("comp_idd");		 
+		$comp_id=$this->input->post("comp_idd");	
+		 
       	if ($comp_id)
 			{
 				$bill_no = $this->input->post("bill_no");
+					//////////////////////////////
+					$str='0000';$stringlen=0;
+				    $stringlen=$bill_no;
+					 $stringlen=strlen($bill_no);
+					 switch ($stringlen) { 
+						case 1:
+							$str='000';
+							break;
+						case 2:
+							$str='00';
+							break; 
+					    case 3:
+								$str='0';
+								break; 		 
+						case 4:
+							$str='';
+							break;               
+						default:
+						$str='0';
+					}
+	                $yearid=$this->input->post("yearid");
+					$mid = $this->db->query("SELECT prefix FROM masyearr where  year_id=$yearid")->row();
+					$bill_noprintmid = $mid->prefix; 
+				 	$billnoprint=$bill_noprintmid.$str.$bill_no ;
+					/////////////////////////////
 				$vch_no = $this->input->post("vch_no");
-				$bill_date=$this->input->post("bill_date");
+		
 		        $netval=$this->input->post("netval");		        	
-		        $pty_code=$this->input->post("accodefrom");
+				$pty_code=$this->input->post("accodefrom");
+				$bill_date=$this->input->post("bill_date"); 
+				$billdatelong=substr($bill_date,6,4).substr($bill_date,3,2).substr($bill_date,0,2);exit();
 				$service_code=$this->input->post("accodeto");				
 		        $remarks=$this->input->post("remarks");
 				$roundoff=$this->input->post("roundoff");
 				
-				$sql = "update trnbilling1  set 
-				           bill_date='".$bill_date."',netval='" .$netval."',roundoff='" .$roundoff."',
+				$sql = "update trnbilling1  set billdatelong='".$billdatelong."',
+				           bill_date='".$bill_date."',billnoprint='".$billnoprint."',netval='" .$netval."',roundoff='" .$roundoff."',
 						   pty_code='".$pty_code."',service_code='".$service_code ."',
-						   remarks='".$remarks."' where  bill_no='".$bill_no."' and comp_id='".$comp_id."' "; 
+						   remarks='".$remarks."' where  bill_no='".$bill_no."' and  yearid='".$yearid."' and comp_id='".$comp_id."' "; 
 				 $bill_date = substr($bill_date, 6, 4).'-'.substr($bill_date,3, 2).'-'.substr($bill_date,0, 2);	
-				$this->updatebilling($netval,$comp_id,$pty_code,$service_code,$bill_date,$vch_no);
+				$this->updatebilling($netval,$comp_id,$pty_code,$service_code,$bill_date,$vch_no,$yearid);
 				 
 				 
 	            $this->db->query($sql); 		
@@ -660,7 +903,7 @@ class Billing extends CI_Controller {
 								taxamt='" . $taxamt . "',totalamount='" . $totalamount . "',
 								pty_code='" . $pty_code . "',service_code='" . $service_code . "',
 								id='".$taskid. "',task_id='".$task_code."' 
-								where  bill_no='" . $bill_no . "' and comp_id='" . $comp_id . "' and indx='". $indx."'"; 
+								where      yearid='".$yearid."' and  bill_no='" . $bill_no . "' and comp_id='" . $comp_id . "' and indx='". $indx."'"; 
 						  
 						$this->db->query($sql);
 						
@@ -684,13 +927,14 @@ class Billing extends CI_Controller {
 				$service_code=$this->input->post("accodeto");				
 		        $remarks=$this->input->post("remarks");
 				$itcode=$this->input->post("itcode");
+				$yearid=$this->input->post("yearid");
 				
 				$sql = "update trnbilling1  set 
 				           bill_date='".$bill_date."',netval='" .$netval."',
 						   pty_code='".$pty_code."',service_code='".$service_code ."',
-						   remarks='".$remarks."' where  bill_no='".$bill_no."' and comp_id='".$comp_id."' "; 
+						   remarks='".$remarks."' where  bill_no='".$bill_no."' and  yearid='".$yearid."'  and comp_id='".$comp_id."' "; 
 				  $bill_date = substr($bill_date, 6, 4).'-'.substr($bill_date,3, 2).'-'.substr($bill_date,0, 2);	
-				 $this->updatebilling($netval,$comp_id,$pty_code,$service_code,$bill_date,$vch_no);
+				 $this->updatebilling($netval,$comp_id,$pty_code,$service_code,$bill_date,$vch_no,$yearid);
 				 
 				 
 	            $this->db->query($sql);  
@@ -707,7 +951,7 @@ class Billing extends CI_Controller {
 	  echo 'Updated!!!!!';
 	 
 	}
-	public function updatebilling($amount,$comp_id,$ptycode,$salescode,$vch_date,$vch_no)
+	public function updatebilling($amount,$comp_id,$ptycode,$salescode,$vch_date,$vch_no,$yearid)
 	{
 		 
 		if ($amount > 0) $dramount=-$amount;
@@ -716,14 +960,14 @@ class Billing extends CI_Controller {
         $sql = " update accentry set   dr_amt='$dramount',ac_code='$ptycode',
 				oppac_code='$salescode',remarks='$reamrks',vch_dt='$vch_date'									
 				where vch_type='SAL'		
-                and  vch_no ='$vch_no'  and comp_id ='$comp_id' and vchid='1' ";	
+                and  vch_no ='$vch_no'  and comp_id ='$comp_id' and vchid='1'  and  yearid='".$yearid."' ";	
          	
 	    $this->db->query($sql);
 		 	
 		$sql = " update accentry set 
 		        cr_amt='$amount',oppac_code='$ptycode',ac_code='$salescode',remarks='$reamrks',
                 vch_dt='$vch_date'								
-				where vch_type='SAL'	and comp_id ='$comp_id' and vch_no ='$vch_no'	  and vchid='2' ";	
+				where vch_type='SAL'	and comp_id ='$comp_id' and vch_no ='$vch_no'	  and vchid='2'  and  yearid='".$yearid."' ";	
 		$this->db->query($sql);		
         	
 	}	
@@ -733,6 +977,7 @@ class Billing extends CI_Controller {
 		$showall=0;
 		$showall=$_POST['showall'];
 		$comp_idd=$_POST['comp_idd'];
+		
 		if(empty($_POST["showall"])) { $showall=0;}
 		
 		$this->db->order_by('trntask2.task_code,task_name');  	
@@ -808,24 +1053,25 @@ class Billing extends CI_Controller {
 			    $str=$str."<INPUT type='hidden' class='test' id='gst$i' value=''  readonly='readonly'  size='4' onchange='totalIt()'  name='gst[]'/>";
 				$str=$str."</TD>";
 			}
-			
-			$str=$str."<TD><input type='hidden' onclick='billed($i,$id)'  name='buttonName' value='Already Billed' id='$i'/> ";
+			$str=$str."<TD>";
+			$str=$str."<input type='hidden' onclick='billed($i,$id)'  name='buttonName' value='Already Billed' id='$i'/> ";
 			$str=$str."<input type='hidden' onclick='free($i,$id)' id='free$i'    value='Free'/>  ";
 			$str=$str."<input type='button' onclick='later($i)' id='later$i'   value='Later'/>";
-			$str=$str."<input type='hidden' id='hdnCount' value='$i' name='hdnCount'></TD>"; 
+			$str=$str."<input type='hidden' id='hdnCount' value='$i' name='hdnCount'>"; 
+	 
             if ($comp_idd==2)
 		    { 		
 //style='display:none'		
-			    $str=$str."<td><INPUT type='hidden'   id='sac$i' name='sac$i' value='testsac' size='1' name='sac[]'/> ";
+			    $str=$str."<INPUT type='hidden'   id='sac$i' name='sac$i' value='testsac' size='1' name='sac[]'/> ";
 				$str=$str."<INPUT type='hidden'   id='taxper$i' value='0'  size='1'   name='taxper[]'/> ";					
 				$str=$str."<INPUT type='hidden'   id='taxableamt$i' readonly='readonly'	size='1' value=''  name='taxableamt[]'/>   "; 					
 				$str=$str."<INPUT type='hidden'   id='cgst$i'	readonly='readonly' value='0'   size='1'  name='cgst[]'/>"; 
 				$str=$str."<INPUT type='hidden'  id='sgst$i' readonly='readonly' 	value='0'  size='1'  name='sgst[]'/> ";		   
 			    $str=$str."<INPUT type='hidden'   id='price$i' readonly='readonly'	size='1' value='0'  name='price[]'/>"; 			
 			    $str=$str."<INPUT type='hidden'   id='gst$i' '  readonly='readonly'  size='1' value='0'  name='gst[]'/>";
-				$str=$str."</TD>";
+			
 			}			
-            			
+			$str=$str."</TD>";			
 			$str=$str."</tr>"; 
             $i=$i+1;  
 		   }

@@ -141,6 +141,7 @@ function callCrudAction(action,id,acname) {
 	},
 	error: function (request, status, error) {
         alert(request.responseText);
+		$("#txtmessage").val(request.responseText);
     }
 	//error:function (){}
 	});

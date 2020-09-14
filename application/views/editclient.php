@@ -265,6 +265,19 @@ error: function(xhr, status, error) {
         <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
       </div>
 	  </div>
+
+	  <div class="txt-heading" >GST State Code-Number Only
+      <div class="form-group has-feedback"> 
+        <input type="gststate" name="gststate" value ="<?php echo $gststate?>" class="form-control" placeholder="GST State Code">
+        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+      </div>
+	  </div>
+	  <div class="txt-heading" >GST Stat Name
+      <div class="form-group has-feedback">
+        <input type="gststate" name="gststatename" value ="<?php echo $gststatename?>" class="form-control" placeholder="GST State Name">
+        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+      </div>
+	  </div>
 	  
 	    
 	      <div class="form-group has-feedback">

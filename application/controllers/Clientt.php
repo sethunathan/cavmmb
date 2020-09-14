@@ -183,14 +183,17 @@ class Clientt extends CI_Controller {
         if ($st == "0") $st = "0";
 		$branch_code=$this->session->userdata('branchcode');
        // $this->db->where('group_code', $branch_code);		//based on accmasaccounts not on masemp
-        $sql = "select * from accmasaccounts where ac_code='$st' and group_code='$branch_code' ";
+	//	$sql = "select * from accmasaccounts where ac_code='$st' and group_code='$branch_code' ";
+		$sql = "select * from accmasaccounts where ac_code='$st' ";
         $query = $this->db->query($sql);
         return $query->result();
     }
 	function gstidsearch()
     {
-        
-        $search = ($this->input->post("ac_name"))? $this->input->post("ac_name") : "0";
+       
+		$search = ($this->input->post("ac_name"))? $this->input->post("ac_name") : "0";
+		//echo $branch_code=$this->session->userdata('branchcode');
+		// echo $search;
 		$data['results'] = $this->get_bookss($search);
 		$this->load->view('gstid',$data);
 	}
@@ -227,7 +230,11 @@ class Clientt extends CI_Controller {
 		$itpwd= $this->input->post('itpwd');		
         $gst= $this->input->post('gst');
         $gstid= $this->input->post('gstid');		
-		$gstpwd= $this->input->post('gstpwd');	
+		$gstpwd= $this->input->post('gstpwd');
+		
+		$gststate= $this->input->post('gststate');
+		$gststatename= $this->input->post('gststatename');
+
 		 $tin_no= $this->input->post('tin_no');	
 		
 		$tdspwd= $this->input->post('tdspwd');		
@@ -282,6 +289,7 @@ class Clientt extends CI_Controller {
 		  $strSQL ="update accmasaccounts set ac_name='".$ac_name."',address='".$address."',
 			        pan='".$pan."',tin_no='".$tin_no."',contactperson='".$contactperson."',ewaybilluserid='".$ewaybilluserid."',
 					ewaybillpwd='".$ewaybillpwd."',
+					gststate='".$gststate."',gststatename='".$gststatename."',
 				    contactno='".$contactno."',itpwd='".$itpwd."',gstid='".$gstid."',
 					gst='".$gst."',gstpwd='".$gstpwd."',tdspwd='".$tdspwd."',iec='".$iec."',entity_code='".$entity_code."',
 					email='".$email."',reg_date='".$reg_date."',group_code='".$group_code."',
@@ -445,6 +453,8 @@ class Clientt extends CI_Controller {
 		$data['contactperson']= $data['cuser']->contactperson;
 		$data['tin_no']= $data['cuser']->tin_no;
 		$data['gst']= $data['cuser']->gst;
+
+		$data['gststate']= $data['cuser']->gststate;$data['gststatename']= $data['cuser']->gststatename;
 		
 		$data['ewaybilluserid']= $data['cuser']->ewaybilluserid;
 		$data['ewaybillpwd']= $data['cuser']->ewaybillpwd;

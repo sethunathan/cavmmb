@@ -138,7 +138,7 @@ li:hover {background-color: #95B4CA;}
 								 <ul class="child">
 				 <?php
 						    $this->db->order_by('followupassigntoorder,task_name');
-                            $this->db->select('task_name,trntask1.task_code');
+                            $this->db->select('followupassigntoorder,task_name,trntask1.task_code');
                             $this->db->distinct();							
 							$this->db->join('trntask2', 'trntask2.task_code = trntask1.task_code');
                             $this->db->where('subjob_code',  $dataa->subjob_code);

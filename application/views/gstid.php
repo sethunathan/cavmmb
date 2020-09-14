@@ -35,13 +35,13 @@ p.padding2 {
 		<?php 
 		    
             $this->db->order_by('ac_name');              	
-            $this->db->where('group_code', $this->session->userdata('branchcode'));      		
-            $this->db->select('ac_name,ac_code,contactno');                      
+            //$this->db->where('group_code', $this->session->userdata('branchcode'));      		
+            $this->db->select('ac_name,ac_code,contactno,group_code');                      
             $castxe= $this->db->get('accmasaccounts');	
 			$row = mysqli_fetch_row($result);
 			foreach($castxe->result() as $data)
 				{
-					$s=$data->ac_name.'-'.$data->contactno;
+					$s=$data->ac_name.'-'.$data->group_code;
 				    echo "<option value='$data->ac_code'";                    			
 				    echo ">$s</option>";
 				} 

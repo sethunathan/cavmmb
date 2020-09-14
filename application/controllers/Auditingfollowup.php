@@ -41,7 +41,7 @@ class Auditingfollowup extends CI_Controller {
 		 //$this->db->where('followupassignto', $emp_code);
 		$this->db->where('trntask2.movetotask <=',0);		
 	    $this->db->where('job_code', 2);
-		$this->db->where('group_code', $branchcode);	
+		//$this->db->where('group_code', $branchcode);	
 	    $this->db->order_by('nextreminderat,trntask2.id,trntask1.task_code,ac_name,trntask2.ac_code');   
 	    $this->db->select('empname,nextreminderat,task_name,ac_name,trntask2.ac_code,
 		trntask2.task_code,accmasaccounts.contactno,trntask2.remarks,trntask2.id,gstid,gstpwd,
@@ -151,7 +151,7 @@ class Auditingfollowup extends CI_Controller {
 	    }
 		//self assign
 		$this->db->where('job_code', 2);
-		$this->db->where('group_code', $branchcode);	
+		$this->db->where('group_code', $branchcode);	//sethu // 01 -jan -2020
 		$this->db->where('movetotask', 1);	
 	    $this->db->order_by('followupdoneat,trntask2.id,trntask2.task_code,ac_name'); 
 	    $this->db->select('tanno,treacespwd,pan,itpwd,empname,followupdoneat,gstid,
@@ -176,8 +176,11 @@ class Auditingfollowup extends CI_Controller {
             $strSQL ="update trntask2 set movetotask=2,			        
 				     entrydoneat='".$current_datetime."',
 					 remarks='".$remarks."',
-				     verificationassignto='".$emp_code."'	 
-			         entrydoneby='".$emp_code."'  where id='".$id."'";
+				     verificationassignto='".$emp_code."',	 
+					 entrydoneby='".$emp_code."'  where id='".$id."'";
+
+			//		 echo '<script>alert("You Have Successfully updated this Record!");</script>';		 
+			 $this->db->query($strSQL);  		 
 			  //self 
 			$orderr = 0;			
             $row = $this->db->query("SELECT MAX(entryandverfiorder) AS maxid FROM trntask2
@@ -240,7 +243,7 @@ class Auditingfollowup extends CI_Controller {
 			  $data['ac_code'] =$ac_code;
         }
 		
-		$this->db->where('entrydoneby !=', $emp_code);			
+		//$this->db->where('entrydoneby !=', $emp_code);			 sethu 01-jan-2020
 		$this->db->where('group_code', $branchcode);	
 		$this->db->where('movetotask', 2);	
 	    $this->db->order_by(' trntask2.id,trntask2.task_code,trntask2.ac_code'); //order by

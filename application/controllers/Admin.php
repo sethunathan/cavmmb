@@ -618,7 +618,7 @@ class Admin extends CI_Controller {
 		//$branch_code=$this->session->userdata('branchcode');
 		$current_datetime=date("Y-m-d");
         $this->db->where('starting_date<=', $current_datetime);	
-        $this->db->select('task_name,trntask1.task_code '); 
+        $this->db->select('followupassigntoorder,task_name,trntask1.task_code '); 
         $this->db->where('movetotask', 0);		   
         $this->db->order_by('followupassigntoorder,trntask1.task_code');
         $this->db->where('followupassignto',  $emp_code);
@@ -638,7 +638,7 @@ class Admin extends CI_Controller {
         $this->db->where('starting_date<=', $current_datetime);	
 		
 		$this->db->distinct();
-        $this->db->select('task_name ,subjobname,ac_name,trntask1.task_code,id,remarks,
+        $this->db->select('entryassignorder,task_name ,subjobname,ac_name,trntask1.task_code,id,remarks,
 		movetotask,entryassisgnedto,verificationassignto'); 
         $this->db->where('movetotask',  1);	
       //  $this->db->where('movetotask<=',  2);				
@@ -698,7 +698,8 @@ class Admin extends CI_Controller {
         $this->db->where('starting_date<=', $current_datetime);		
         
         $this->db->distinct(); 		
-        $this->db->select('task_name ,subjobname,ac_name,trntask1.task_code,id,remarks,movetotask,entryassisgnedto,verificationassignto'); 
+		$this->db->select('task_name ,subjobname,ac_name,trntask1.task_code,id,remarks,movetotask,
+		entryassisgnedto,verificationassignto,verificationassignorder'); 
         $this->db->where('movetotask',  2);		   
         $this->db->order_by('verificationassignorder,subjobname,trntask1.task_code');           
 		$this->db->join('trntask1', 'trntask2.task_code = trntask1.task_code');
@@ -1059,7 +1060,7 @@ class Admin extends CI_Controller {
 		$branch_code=$this->session->userdata('branchcode');		
 		$emp_code = $this->session->userdata('emp_code');
 		$admin = $this->session->userdata('admin');
-	
+	     
 		if($admin==1)
 		{
 			
@@ -1072,14 +1073,14 @@ class Admin extends CI_Controller {
    		}
 		 
 		$current_datetime=date("Y-m-d");
-		
+	 
 		$this->db->where('tds', 0);//only not fit for followp + entry + verifcation register
 		//$this->db->where('job_code !=',5); 		
 		$this->db->where('movetotask', 0);
 		$this->db->where('followupassignto', $emp_code);		
 		$this->db->distinct();	
         $this->db->where('starting_date<=', $current_datetime);	
-		$this->db->order_by('subjobname,trntask1.task_code');	        
+		$this->db->order_by('subjobname,trntask1.task_code,followupassignto');	        
 	    $this->db->select('massubjob.job_code,empname,followupassignto,ending_date,
 		starting_date,subjobname,task_name,trntask1.task_code');
 	    $this->db->join('trntask1', 'trntask1.subjob_code = massubjob.subjob_code','left');
@@ -1095,7 +1096,9 @@ class Admin extends CI_Controller {
         $strSQL =  "INSERT INTO tmpdaysbreakup(empcode,orderbydate,typee,prevempname,id,dayss,followupdoneat,entrydoneat,entryandverfiorder,
 			entryassignorder,verificationassignorder,movetotask,ac_code,ac_name,job_code,currentempname,verificationassignto,ending_date,
 			starting_date,subjobname,task_name,task_code) 
-			select  masemp.emp_code,concat(MID(followupdoneat, 7, 4),'-', MID(followupdoneat, 4, 2),'-',MID(followupdoneat, 1,2)),'Entry Level' as typee,masprev.empname as prevempname,id,datediff(entrydoneat, followupdoneat) as dayss,
+			select  masemp.emp_code,
+			concat(MID(followupdoneat, 7, 4),'-', MID(followupdoneat, 4, 2),'-',MID(followupdoneat, 1,2)),
+			'Entry Level' as typee,masprev.empname as prevempname,id,datediff(entrydoneat, followupdoneat) as dayss,
 			 followupdoneat,entrydoneat,entryandverfiorder,entryassignorder,verificationassignorder,
 			 movetotask,accmasaccounts.ac_code,ac_name,massubjob.job_code,masemp.empname as currentempname,entryassisgnedto,ending_date,
 			starting_date,subjobname,task_name,trntask1.task_code from (((((massubjob
@@ -1295,7 +1298,7 @@ class Admin extends CI_Controller {
         //    echo '<a href="'.$submenu_link.'">'.$submenu_name.'</a><br>';
        // }
     //}
-//}
+//
     }
 
 	 
@@ -1498,7 +1501,96 @@ class Admin extends CI_Controller {
 		//followupdoneby,entrydoneby,verificationdoneby,finalstagedoneby
 		//entrylevelreverseby,verificationlevelreverseby,finalstagereverseby
 		
-    }	
+	}	
+	public function viewalltest() {	
+		 
+		 $data['accgroup'] =-100;
+		 $data['stage'] =-100;	 				
+		 $data['task'] =-100;
+		 $data['vehicle'] =1; 
+		 if (isset($_POST['stage']))
+		 {
+			 $vehicle=0;		
+			 $stage=$_POST["stage"];	
+			 $task=$_POST["task"];			 
+			 $accgroup=$_POST["accgroup"];
+			 $gender=$_POST["gender"];
+			 
+			 if (isset($_POST['accgroup']))
+			 {
+				$vehicle=$_POST["vehicle"];
+			 }
+			 $data['task'] =$task;
+			 $data['stage']= $stage;
+			 $data['accgroup']= $accgroup;
+			 $data['vehicle']= $vehicle;
+			 $data['gender']= $gender;
+			  
+			 // Link ITR  Defective IT  Processed IT   Verified IT
+		
+			if ($gender==1)  
+			 {
+				 $this->db->where('verified>=',0);	
+				 $this->db->where('verified<=',1);	
+				  
+			 }
+			 
+			 if ($gender==2)  
+			 {
+				 $this->db->where('verified',3);			
+				  
+			 }
+			 if ($gender==3)  
+			 {
+				 $this->db->where('verified',4);		
+				  
+			 }
+			 if ($gender==4)  
+			 {
+				 $this->db->where('verified',2);		
+				  
+			 }
+ 
+			 $current_datetime=date("Y-m-d");
+			 $this->db->where('starting_date<=', $current_datetime);	
+			 if ($vehicle==1)  
+			 {
+				 $this->db->where('entryassisgnedto', 0);
+			 }
+			 
+			 if ($accgroup>-1)  
+			 {
+					 $this->db->where('accmasaccounts.group_code', $accgroup);
+			 }
+			 
+			 if ($task>-1)  
+			 {
+				 $this->db->where('trntask2.task_code', $task);
+			 }
+			 
+			 if ($stage>-1)				 
+			 {
+				 $this->db->where('movetotask', $stage);
+			 }	
+			   
+		 }
+			  
+		 else
+		 {
+			   //  $this->db->where('trntask2.task_code', 0);
+				  //$this->db->where('movetotask', 1);
+				 $data['accgroup'] =-100;
+				 $data['stage'] =-100;	 				
+				 $data['task'] =-100;
+				 $data['vehicle'] =1; 
+		 }
+		  $this->load->view('viewalltest',$data);			
+		
+		 
+		 //followupdoneby,entrydoneby,verificationdoneby,finalstagedoneby
+		 //entrylevelreverseby,verificationlevelreverseby,finalstagereverseby
+		 
+	 }	
 	public function viweall1()
 	{ 
 	   
@@ -1585,6 +1677,62 @@ class Admin extends CI_Controller {
         $this->db->join('trnbilling2', 'trnbilling2.id = trntask2.id','left');  		
 	    $data['client'] = $this->db->get('trntask2')->result_array();
 		$this->load->view('viewall1',$data);	
+		}
+       
+	}
+	public function viwealltest1()
+	{ 
+	  
+		 if (isset($_POST['stage']))
+		{
+            $vehicle=0;	
+            if (isset($_POST['accgroup']))	{ $vehicle=$_POST["vehicle"];		}
+			
+			$accgroup=$_POST["accgroup"];$data['accgroup']= $accgroup;
+            $stage=$_POST["stage"];	$data['stage']= $stage;
+			$task=$_POST["task"];$data['task'] =$task;	 
+			 
+			 
+		//	if ($stage==-1)  { }			
+			//else  if ($stage>-1){$this->db->where('movetotask', $stage); }
+			
+			//if ($task==0){}
+			//else if ($task>0)  {$this->db->where('trntask2.task_code', $task);  }
+		 
+			if ($task>0)  {$this->db->where('trntask2.task_code', $task);  }
+			{$this->db->where('movetotask', $stage); }
+			   
+			$current_datetime=date("Y-m-d");
+            $this->db->where('starting_date<=', $current_datetime);	 
+			if ($accgroup>-1)  
+		    {
+					$this->db->where('accmasaccounts.group_code', $accgroup);
+			} 
+        
+		
+		$this->db->order_by('followupdoneat,entrydoneat,trntask2.task_code,ac_name,trntask2.ac_code'); 
+	    $this->db->select('followupdoneat,trnbilling2.bill_date,trnbilling2.comp_id,trnbilling2.bill_no,billed,starting_date,target_date,task_name,ac_name,trntask2.ac_code,
+		trntask2.task_code,entrydoneat,accmasaccounts.contactno,trntask2.remarks,remarks1,remarks2,remarks3,trntask2.id,
+		followupassignto,masfollowupassign.username as followupassingnto,
+		followupdoneby,masfollowup.username as followupby,
+		entrydoneby,masentrydone.username as entrydone,
+		verificationdoneby,masverificationdone.username as verificationdone,
+		finalstagedoneby,masfinalstagedone.username as finalstagedone,	
+		verificationassignto,masverificationassign.username as verificationassign,
+		accmasaccounts.group_code,movetotask,stage_name');	
+		
+	    $this->db->join('trntask1', 'trntask1.task_code = trntask2.task_code'); 
+		$this->db->join('masstage', 'masstage.stage_code = trntask2.movetotask','left'); 
+	    $this->db->join('accmasaccounts', 'accmasaccounts.ac_code = trntask2.ac_code'); 
+        $this->db->join('masemp masfollowup', 'masfollowup.emp_code = trntask2.followupdoneby','left');
+        $this->db->join('masemp masentrydone', 'masentrydone.emp_code = trntask2.entryassisgnedto','left');
+        $this->db->join('masemp masfollowupassign', 'masfollowupassign.emp_code = trntask2.followupassignto','left');		
+		$this->db->join('masemp masverificationassign', 'masverificationassign.emp_code = trntask2.verificationassignto','left');
+        $this->db->join('masemp masverificationdone', 'masverificationdone.emp_code = trntask2.verificationdoneby','left');
+        $this->db->join('masemp masfinalstagedone', 'masfinalstagedone.emp_code = trntask2.finalstagedoneby','left'); 
+        $this->db->join('trnbilling2', 'trnbilling2.id = trntask2.id','left');  		
+	    $data['client'] = $this->db->get('trntask2')->result_array();
+		$this->load->view('viewalltest1',$data);	
 		}
        
 	}

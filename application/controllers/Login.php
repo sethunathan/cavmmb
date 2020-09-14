@@ -65,7 +65,8 @@ class Login extends CI_Controller {
 				   $this->session->set_userdata('username',$username);
                    $branch_code=$this->session->userdata('branchcode');		
 		           $emp_code = $this->session->userdata('emp_code');
-		           $current_datetime=date("Y-m-d");
+				   $current_datetime=date("Y-m-d");
+				   
 		           redirect(base_url() . 'admin\main');	
 			    }
 		    }	

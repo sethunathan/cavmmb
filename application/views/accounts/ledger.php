@@ -15,19 +15,19 @@
 		<option  value="Select" selected>தேர்வு செய்யவும்</option>				
 		<?php            		            
 				$this->db->select('ac_name,ac_code');						
-				$admin = $this->session->userdata('admin');
+			 	$admin = $this->session->userdata('admin');
 		        if ($admin==1)
 		        {
 			
 		        }
                  else if ($admin==0)
 		        {				
-				    $branchcode = $this->session->userdata('branchcode');
+				     $branchcode = $this->session->userdata('branchcode');
 				    $this->db->where('group_code', $branchcode);
 				}				 
 				$this->db->order_by('ac_name'); 		
 				$castxe= $this->db->get('accmasaccounts');		
-				$row = mysql_fetch_row($result);			
+				$row = mysqli_fetch_row($result);			
 				foreach($castxe->result() as $data)				
 					{									
 					    $str=ucwords($data->ac_name);

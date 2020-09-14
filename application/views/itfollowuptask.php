@@ -76,11 +76,7 @@
 	<td contenteditable="true"
 	onBlur="savegstaccmasaccounts(this,'itpwd','<?php  echo $rsclient['ac_code'] ?>','<?php  echo $rsclient['ac_name'] ?>')"
 	onClick="showEdit(this);"><?php echo $rsclient['itpwd'] ; ?></td>
-	
-	
-	
-   
-	
+	 
 
 	 <td>
 	   <button type="button" class="btn btn-primary"         	 

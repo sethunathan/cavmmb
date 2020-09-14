@@ -14,7 +14,7 @@
 					</td>
 		</tr>
 		 <tr>
-		    <td><label>Accounts From</label></td>
+		    <td><label>Accounts From  s</label></td>
 				<td>
 					<select  id="accodefrom" name="accodefrom">		 
 					    <?php
@@ -22,13 +22,14 @@
 							$this->db->select('ac_name,ac_code'); 
 							$this->db->order_by('ac_name');   
 							
-							$id=$this->session->userdata('agentid');
-							$this->db->where('comp_id', $id);
-							$names = array(2, 3, 17,18);
-                            $this->db->where_not_in('group_code', $names);
+						//	$id=$this->session->userdata('agentid');
+						//	$this->db->where('comp_id', $id);
+						
+							//$names = array(2, 3);
+                           // $this->db->where_not_in('group_code', $names);
                            					
                             $castxe= $this->db->get('accmasaccounts');	
-							$row = mysql_fetch_row($result);
+							$row = mysqli_fetch_row($result);
 				            foreach($castxe->result() as $data)
 				             {
 				               echo "<option value= '$data->ac_code'";
@@ -65,7 +66,7 @@
                             $this->db->where_in('group_code', $names);		
 							
                             $castxe= $this->db->get('accmasaccounts');	
-							$row = mysql_fetch_row($result);
+							$row = mysqli_fetch_row($result);
 				            foreach($castxe->result() as $data)
 				             {
 				               echo "<option value= '$data->ac_code'";

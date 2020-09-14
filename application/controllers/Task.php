@@ -24,6 +24,7 @@ class Task extends CI_Controller {
 
 	{
 	  $this->db->order_by('task_code','desc');
+
 	  $data['task'] = $this->db->get('trntask1')->result_array();
       $this->load->view('taskalter',$data);	
 	}
@@ -51,7 +52,8 @@ class Task extends CI_Controller {
         $config['first_tagl_close'] = '</li>';
         $config['last_tag_open'] = '<li class="page-item">';
         $config['last_tagl_close'] = '</a></li>';
-        $config['attributes'] = array('class' => 'page-link');
+		$config['attributes'] = array('class' => 'page-link');
+		 
         $data["results"] = $this->masaccounts($config["per_page"], $page);
         $data["links"] = $this->pagination->create_links();
 
@@ -80,14 +82,16 @@ class Task extends CI_Controller {
 	public function masaccounts($limit, $start) {
         $this->db->limit($limit, $start);
 		 
-		$this->db->order_by('trntask1.task_code','desc');
+	 	$this->db->order_by('trntask1.task_code','desc');
+	     //$this->db->order_by('massubjob.subjob_code','desc');
 		//$this->db->where('repeatt <', 5); 
-        $this->db->where('job_code !=',5); 		
+	 	$this->db->where('massubjob.activee',1); 		
+        $this->db->where('trntask1.subjob_code !=',5); 		
 		$this->db->join('massubjob', 'trntask1.subjob_code = massubjob.subjob_code');
-		$this->db->join('trntask2', 'trntask1.task_code = trntask2.task_code');
+	//	$this->db->join('trntask2', 'trntask1.task_code = trntask2.task_code');
         $query = $this->db->get("trntask1");
 		//$this->db->join('accmasaccounts', 'accmasaccounts.ac_code = trntask1.ac_code');
-        $query = $this->db->get("trntask1");
+      //  $query = $this->db->get("trntask1");
 
         if ($query->num_rows() > 0) {
             foreach ($query->result() as $row) {
@@ -151,11 +155,11 @@ class Task extends CI_Controller {
 			 
 	        foreach($flagg as $value)
          {
-            $strSQL = "INSERT INTO trntask2 ";			
-                    $strSQL .="(task_code,ac_code) ";
-                    $strSQL .="VALUES ";
-                    $strSQL .="(".$task_code.",'".$value."') ";	          
-			        $this->db->query($strSQL);	
+                $strSQL = "INSERT INTO trntask2 ";			
+                $strSQL .="(task_code,ac_code) ";
+                $strSQL .="VALUES ";
+                $strSQL .="(".$task_code.",'".$value."') ";	          
+			    $this->db->query($strSQL);	
              }
 			 
 				  

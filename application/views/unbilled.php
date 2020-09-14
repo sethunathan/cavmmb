@@ -1,5 +1,11 @@
 <?php include 'body.php';?>
 
+ 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
+  
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css" rel="stylesheet"/>  
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script> 
 <style>
 .message-box{margin-bottom:20px;border-top:#F0F0F0 2px solid;background:#FAF8F8;padding:10px;}
 .btnEditAction{background-color:#2FC332;border:0;padding:2px 10px;color:#FFF;}
@@ -18,13 +24,10 @@
         </li>  <img src="<?php echo base_url(); ?>homeassests/images/LoaderIcon.gif"  style="display:none" id="loaderIcon"  />
 		
 <form action="<?php echo base_url(); ?>billing/unbilled" method="post">
- 
- <br>
- 
-		 			 	
+<textarea class ="message-box" name="txtmessage" id="txtmessage" rows="1"  cols="50" >Welcome!!!</textarea>
+       <br>  			 	
 	   <div class="form-group has-feedback"> 
-	    <select class="form-control" id="accgroup" name="accgroup">
-          
+	    <select class="form-control" id="accgroup" name="accgroup"> 
 		<?php
 			
             $names = array(7,8);
@@ -55,11 +58,7 @@
         </div> 
 		 
  </form>
- 
- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css" rel="stylesheet"/> 
- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script> 
+
 <textarea class ="message-box"  name="txtmessage" id="txtmessage" rows="1"  cols="50" >Welcome!!!</textarea>
  
  
@@ -71,8 +70,9 @@
     <th data-field="name" data-sortable="true">Client Name</th>
 	<th data-field="con" data-sortable="true">Task  Name</th>
     <th data-field="opn" data-sortable="true">Remarks</th>
-<th data-field="totdr" data-sortable="true">Task ID</th>
-<th data-field="totcr" data-sortable="true">Moved By</th>	
+	<th>Edit Remarks</th>
+   <th data-field="totdr" data-sortable="true">Task ID</th>
+    <th data-field="totcr" data-sortable="true">Moved By</th>	
 	<th data-field="task" data-sortable="true">Closing Balance</th>
 	<th data-field="status" data-sortable="true">Status</th>
 		<th data-field="taskk" data-sortable="true">Already Billed  </th>
@@ -85,7 +85,17 @@
 	<td><?php echo $i; ?></td> 
     <td style="word-wrap: break-word;min-width: 100px;max-width: 100px;"><?php echo $rsclient['ac_name'];?></td> 
 	<td ><?php echo $rsclient['task_name']; ?></td> 
-	<td ><?php echo $rsclient['remarks']; ?></td> 
+    
+	<td id="remarks_<?php echo $rsclient['id'];?>" >   <?php echo $rsclient['remarks'] ; ?></td> 
+	<td>     
+	      <button type="button" class="btn btn-primary"         	 
+			data-id="<?php echo $rsclient['id']; ?>"   
+            data-remarks="<?php echo $rsclient['remarks']; ?>"
+			data-toggle="modal" data-target="#exampleModal">
+            Edit Remarks
+         </button>
+	</td>
+	 
 	<td ><?php echo ($rsclient['id']); ?></td> 
 	<td ><?php echo ($rsclient['empname']); ?></td> 
 	<td ><?php echo abs($rsclient['closbal']); ?></td>
@@ -110,44 +120,17 @@
   <?php $i=$i+1; ?>
     
 <?php endforeach ; ?>
-</table>
- 
-  
- 
- 
-</div>
+</table> 
 
-     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/js/select2.min.js"></script>
-
-<script script="javascript">
-// In your Javascript (external .js resource or <script> tag)
-$(document).ready(function() {
-    $('.form-control').select2();
-	$("#stage").select2();
-});
-</script>
-  <script>
-function callCrudAction(id) {
-	$("#loaderIcon").show();
+<script>
+function callCrudAction(id,acname) {
+	$("#loaderIcon").show();  
 	 
-	
-		 
-	
-    
-     
-	
 	jQuery.ajax({
-	url: '<?php echo site_url("billing/movetotask1")?>',
-	data:{ id:id},
+	url: '<?php echo site_url("billing/movetotask2")?>',
+	data:{ action:action,id:id},
 	type: "POST",
-	success:function(data){
-		 		 
-			 
-				$('#message_'+id).fadeOut();
-				$("#txtmessage").val(id+' Sucessfully Reversed ');				
-			 
-		 
+	success:function(data){	 
 		 
 		$("#loaderIcon").hide();
 	},
@@ -160,5 +143,84 @@ function callCrudAction(id) {
 
 
 </script>
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel"> </h4>
+            </div>
+            <div class="modal-body">
+		
+        <div id="id">       
+               <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+         </div>	
+		   
+		 <div class="form-group has-feedback">
+        <input type="text" id="remarks" value ="" class="form-control"		 
+		placeholder="Remarks">
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+      </div>  
+	  <button type="button"
+	    id="movetoverificationlevelmodal" 
+	     data-dismiss="modal"
+		   class="btn btn-primary"
+		    name="movetoentrylevelmodal"
+        onClick="saveverificationlevelmodal(document.getElementById('id').value,		
+		document.getElementById('remarks').value )
+		">
+        Save
+	  </button> 
+	</div>
+	
+        </div>
+	<div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+       </div> 
+    </div> 
+</div>  
+</div>
+
+<script>
+function saveverificationlevelmodal(id,remarks) {
+	$("#loaderIcon").show();  
+	jQuery.ajax({
+	url: '<?php echo site_url("billing/saveremarks")?>',
+	data:{id:id,remarks:remarks
+	},
+	type: "POST",
+	success:function(data){ 
+		//	$('#message_'+id).fadeOut();				
+		//$('#message_'+id).hide();	
+  	    	$('#remarks_'+id).text(remarks); 			 
+			$("#txtmessage").val(remarks+'Saved'); 
+	    	$("#loaderIcon").hide();
+	},
+	error: function (request, status, error) {
+        alert(request.responseText);
+		 $("#txtmessage").val(request.responseText);
+    }
+	
+	});
+}
+</script>
+<script type="text/javascript">
+ 
+ $(document).ready(function(){
+	 $('#exampleModal').on('show.bs.modal', function (e) {
+		 $('#id').val('loading');
+		 
+		 var  id = $(e.relatedTarget).data('id');   
+		 var  remarks = $(e.relatedTarget).data('remarks');    
+		 $('#remarks').val(remarks);	 
+		 $('#id').html(id);
+		 $('#id').val(id);
+	  });
+	   
+ });
+  
+ </script>
 <?php include 'bodyfooter.php';?>
   

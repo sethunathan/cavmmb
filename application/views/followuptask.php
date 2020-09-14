@@ -102,8 +102,6 @@ echo  $difference->d.' days';
 		<td contenteditable="true"
 	onBlur="saveToDatabase(this,'remarks','<?php  echo $rsclient['id'] ?>','<?php  echo $rsclient['ac_name'] ?>')"
 	onClick="showEdit(this);"><?php echo $rsclient['remarks'] ; ?></td>
-	
-   
 	<td>
 	   <button type="button" class="btn btn-primary"         	 
 			data-id="<?php echo $rsclient['id']; ?>"  

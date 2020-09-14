@@ -203,7 +203,11 @@ class Clientaccounts extends CI_Controller {
         $contactno= $this->input->post('contactno');	
     		
 		//$itpwd= $this->input->post('itpwd');		
-        $gst= $this->input->post('gst');
+		$gst= $this->input->post('gst');
+		$gstsate= $this->input->post('gstsate');
+		$gststatename= $this->input->post('gststatename');
+	 
+		
        // $gstid= $this->input->post('gstid');		
 		//$gstpwd= $this->input->post('gstpwd');	
 		 $tin_no= $this->input->post('tin_no');	
@@ -257,6 +261,7 @@ class Clientaccounts extends CI_Controller {
 			        tin_no='".$tin_no."',contactperson='".$contactperson."',opn_bal='".$opn_bal."',
 				    contactno='".$contactno."',gstid='".$gstid."',
 					iec='".$iec."',entity_code='".$entity_code."',
+					gstsate='".$gstsate."',gststatename='".$gststatename."',
 					email='".$email."',reg_date='".$reg_date."',group_code='".$group_code."',
 					tanno='".$tanno."'
 			        where ac_code='".$ac_code."'";
@@ -325,6 +330,8 @@ class Clientaccounts extends CI_Controller {
 		$data['contactperson']= $data['cuser']->contactperson;
 		$data['tin_no']= $data['cuser']->tin_no;
 		$data['gst']= $data['cuser']->gst;
+		$data['gststate']= $data['cuser']->gststate;
+		$data['gststatename']= $data['cuser']->gststatename;
 		
 		$data['opn_bal']= $data['cuser']->opn_bal;
 		

@@ -74,16 +74,33 @@ $(document).ready(function() {
 		</tr>
 	
 		 <tr>
-
-
-		    <td><label>Accounts From</label></td>
+		          
+		 <?php echo $admin = $this->session->userdata('admin');?>
+		    <td><label>Accounts Froms<?php	 echo's'.$admin = $this->session->userdata('admin');?></label></td>
 				<td>  <select  class="formm-control"  style="width: 100%"  id="accodefrom" name="accodefrom">
 				<?php	
 				$this->db->select('ac_name,clos_bal,ac_code'); 
 				$this->db->order_by('ac_name');  
-               				
-			    $branchcode = $this->session->userdata('branchcode');
-				$this->db->where('group_code', $branchcode);	
+				echo $admin = $this->session->userdata('admin');
+							 
+				if(($admin === NULL))
+				{
+
+					$admin=0;
+				}
+				$this->db->select('ac_name,ac_code'); 
+				$this->db->order_by('ac_name'); 
+				if ($admin==1)
+					{
+						$names = array(2,3);
+						$this->db->where_not_in('group_code',$names);	
+					}
+					else if ($admin==0)
+					{
+						$branchcode = $this->session->userdata('branchcode');
+						$this->db->where('group_code', $branchcode);	
+					}  
+				  
 				 
 				$castxe= $this->db->get('accmasaccounts');	
 				$row = mysqli_fetch_row($result);		

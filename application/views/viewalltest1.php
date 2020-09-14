@@ -1,0 +1,231 @@
+<?php include 'body.php';?>
+
+<style>
+.message-box{margin-bottom:20px;border-top:#F0F0F0 2px solid;background:#FAF8F8;padding:10px;}
+.btnEditAction{background-color:#2FC332;border:0;padding:2px 10px;color:#FFF;}
+.btnDeleteAction{background-color:#D60202;border:0;padding:2px 10px;color:#FFF;margin-bottom:15px;}
+#btnAddAction{background-color:#09F;border:0;padding:5px 10px;color:#FFF;}
+</style>
+ <li class="active treeview">
+          <a href="<?php echo base_url(); ?>admin/viwealltest1">
+            <i class="fa fa-dashboard"></i> <span>Test</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>         
+        </li>  <img src="<?php echo base_url(); ?>homeassests/images/LoaderIcon.gif"  style="display:none" id="loaderIcon"  />
+		
+<form action="<?php echo base_url(); ?>admin/viwealltest1" method="post">
+ 
+ <br>
+ 
+		 	
+	    <div class="form-group has-feedback"> 
+	    <select class="form-control" id="accgroup" name="accgroup">
+          <option value="-100">None</option>		
+        <option value="-1">All</option>	  
+		<?php
+			
+            $names = array(7,8);
+            $this->db->where_in('group_code', $names);		
+							
+            $this->db->order_by('group_code');					
+            $this->db->select('groupname,group_code');                      
+            $castxe= $this->db->get('accmasgroup');	 
+			foreach($castxe->result() as $data)
+				{
+				    echo "<option value='$data->group_code'";     
+                   	if($data->group_code==$accgroup) {echo "selected";}								
+				    echo ">$data->groupname</option>";
+				} 
+		?>  
+		</select>
+      </div>
+ 
+	  
+  <div class="form-group has-feedback"> 
+<select id ="stage" style="width: 100%" class="form-control" name="stage"> 
+       
+<?php
+			 		
+            $this->db->order_by('stage_code');
+			$this->db->where('visible',1); 	
+			$this->db->where('stage_code >=',1); 	
+            $this->db->where('stage_code <=',2); 		
+            $this->db->select('stage_name,stage_code');                      
+            $castxe= $this->db->get('masstage');	
+		    foreach($castxe->result() as $data)
+				{
+				    echo "<option value='$data->stage_code'"; 
+                    if($data->stage_code==$stage) {echo "selected";}							
+				    echo ">$data->stage_name</option>";
+				} 
+		?>   
+</select>
+ </div>
+ 
+		 	
+	    <div class="form-group has-feedback"> 
+	  <select class="form-control" id="task" name="task">	
+	     <option value="-100">None</option>
+        <option value="-1">All</option>	  
+		<?php
+			 		
+            $this->db->order_by('task_code');					
+            $this->db->select('task_name,task_code');                      
+            $castxe= $this->db->get('trntask1');	 
+			foreach($castxe->result() as $data)
+				{
+				    echo "<option value='$data->task_code'";     
+                   	if($data->task_code==$task) {echo "selected";}								
+				    echo ">$data->task_name</option>";
+				} 
+		?>  
+		</select>
+      </div>
+ 
+
+	 
+	 <div class="col-xs-4">
+	   
+          <button type="submit" class="btn btn-primary btn-block btn-flat">Load</button>
+        </div> 
+		 
+ </form>
+ 
+ <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+ <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css" rel="stylesheet"/>
+ 
+
+ 
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
+ 
+<textarea class ="message-box"  name="txtmessage" id="txtmessage" rows="1"  cols="50" >Welcome!!!</textarea>
+<div class="table-responsive">
+<table      data-toggle="table"   width="100%" border="1" cellspacing="2" cellpadding="4" >
+  <thead><tr>
+    
+    <th data-sortable="true">S.No </th> 
+	
+    <th data-field="name" data-sortable="true">Client Name</th>	
+	
+	<th data-field="task" data-sortable="true">Task Name</th>
+	<th data-sortable="true">Followp </th>	 
+	<th data-sortable="true">Entry </th> 
+    <th data-sortable="true">Stage</th>
+    <th data-sortable="true">Remarks</th>
+	
+		
+	<th data-sortable="true">Verfication</th>
+	<th data-sortable="true">Starting Date</th>
+	<th data-sortable="true">Due Date</th>
+	<th data-sortable="true">Billed(Y/N)</th>
+</tr></thead>
+  
+<?php $i=1; foreach ($client as $rsclient) :  ?>  
+    
+	 
+    <tr id="message_<?php echo $rsclient['id'];?>" class="table-row">
+	<td><?php echo $i; ?></td> 
+  
+    <td style="word-wrap: break-word;min-width: 100px;max-width: 100px;"><?php echo $rsclient['ac_name'].'-'.$rsclient['group_code'] ?></td>
+	<td><?php echo $rsclient['task_name'].'-'.$rsclient['id']; ?></td>	
+	<td> 
+	     <?php echo $rsclient['followupassingnto'] ; ?>  	
+	     <?php echo $rsclient['followupby'].'-'.$rsclient['followupdoneat'] ; ?>
+	</td>
+
+	 
+	<td><?php echo $rsclient['stage_name'] ; ?></td>
+   
+    <td style="word-wrap: break-word;min-width: 100px;max-width: 100px;"><?php echo $rsclient['remarks'] ?></td>
+	 
+	       <td class="span6">
+	<?php
+	if ($rsclient['entrydone'])
+	{
+		echo $rsclient['entrydone'].'-'.$rsclient['entrydoneat'] ;
+	}
+	else
+		{
+		?>
+	    <div id="divv_<?php echo $rsclient['id'];?>">* </div>
+		 <div id="divvv_<?php echo $rsclient['id'];?>">
+		<select class="form-control" id="select_<?php echo $rsclient['id'];?>" name="task">	
+		 <?php
+			 		
+            $this->db->order_by('emp_code');
+            $this->db->where('active',1); 			
+            $this->db->select('empname,emp_code');                      
+            $castxe= $this->db->get('masemp');	
+		    foreach($castxe->result() as $data)
+				{
+				    echo "<option value='$data->emp_code'";                   						
+				    echo ">$data->empname</option>";
+				} 
+		?>   
+        </select>
+		 <Button id="button_<?php echo $rsclient['id'];?>   class="btnEditAction" name="reverse"
+	     onclick="saveentry('<?php  echo $rsclient['id'] ?>')"> Assingn</Button>
+       	<?php }?>
+		 </div>
+			
+	</td>  
+	 <td>	
+	<?php echo  $rsclient['verificationassign'] ; ?>
+	 .
+	<?php echo  $rsclient['verificationdone'] ; ?>
+	</td>
+	<td><?php echo  date("d-m-Y", strtotime($rsclient['starting_date']) );	?>	</td>	 
+	<td><?php echo  date("d-m-Y", strtotime($rsclient['target_date']) );	?>	</td>
+   	 <td><?php  if ($rsclient['billed']==1) 
+	 {
+		 echo $rsclient['comp_id'].'-'.$rsclient['bill_no'].'/Dt.'.$rsclient['bill_date'];
+	 } 
+	 else { echo 'N';}   ?></td>  
+	
+	 
+
+  
+  </tr> 
+  <?php $i=$i+1; ?>
+    
+<?php endforeach ; ?>
+</table>
+ </div>
+</div>
+
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/js/select2.min.js"></script>
+
+<script script="javascript">
+// In your Javascript (external .js resource or <script> tag)
+$(document).ready(function() {
+    $('.form-control').select2();
+	$("#stage").select2();
+});
+</script>
+
+ <script>
+function saveentry(id) { 
+	$test=$('#select_'+id).val();	
+     $('#divv_'+id).html('Loading');		
+	$.ajax({
+		url: '<?php echo site_url("admin/saveentry")?>',
+		type: "POST",
+		data:'id='+id+'&emp_code='+$test,		
+		success: function(data){
+			 	    $('#divv_'+id).html('OK');
+                    $('#divvv_'+id).hide();			   
+	 		
+		},
+	error: function (request, status, error) {
+        alert(request.responseText);
+    }
+    //$("#loaderIcon").hide();    
+   }); 
+}
+</script>
+<?php include 'bodyfooter.php';?>
+  

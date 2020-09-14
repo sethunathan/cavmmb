@@ -169,7 +169,7 @@ tr:hover .cut { opacity: 1; }
 			
 			<?php foreach ($company as $rscompany)
 			{
-				$bill_no=$rscompany['bill_no'] ;
+				$bill_no=$rscompany['billnoprint'] ;
 				$bill_date=$rscompany['bill_date'] ;
 				$netval=$rscompany['netval'] ;
 				$roundoff =$rscompany['roundoff'] ;
@@ -330,7 +330,7 @@ tr:hover .cut { opacity: 1; }
 			</table>
 			<table>
 			    <tr>
-				S.NO. 3,8,13,28 Task name change to tax audit list sir
+			 
 				<td  width="40%">
 					  <table>	
                         <tr>

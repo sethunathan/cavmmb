@@ -25,10 +25,10 @@
                     <input class="form-control" id="ac_name" name="ac_name" placeholder="Search for Ac Name..." type="text" value="<?php echo set_value('book_name'); ?>" />
                 </div>
 				</div>
-				
 		<div class="txt-heading" >Group 
+		 	
 	    <div class="form-group has-feedback"> 
-	    <select class="form-control" id="groupname" name="groupname">		     
+	  <select class="form-control" id="groupname" name="groupname">		     
 		<?php
 			 		
             $this->db->order_by('group_code');					
@@ -44,7 +44,6 @@
 		</select>
       </div>
 	  </div>  
-	  
 	    <hr>
                 <div class="col-md-6">
                     <input id="btn_search" name="btn_search" type="submit" class="btn btn-danger" value="Search" />

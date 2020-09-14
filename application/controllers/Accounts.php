@@ -4,14 +4,17 @@ if (!defined('BASEPATH'))    exit('No direct script access allowed');
 
 class Accounts extends CI_Controller {
 
-	public function __construct()
+	  function __construct()
     {
-		//$this->output->set_header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-        //$this->output->set_header('Pragma: no-cache');
-        //$this->output->set_header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+        
         parent::__construct();
         $this->load->library('session');
 		$this->load->helper('url');
+		if (!$this->session->userdata('loggedin'))
+        {	
+			$target= base_url().'login';
+            header("Location: " . $target);
+        }
     }
 	public function getbilllist()
 	{
@@ -96,7 +99,7 @@ class Accounts extends CI_Controller {
 	    $vch_no=$this->uri->segment(3);
         $comp_id=$this->uri->segment(4); 
         $ac_code=$this->uri->segment(5);   		
-		
+	
 				
 		$this->db->where('vch_no', $vch_no);
 		$this->db->where('vch_type', 'REC');
@@ -254,9 +257,9 @@ class Accounts extends CI_Controller {
 	}
 	public function index()
 	{  
+		echo $branchcode = $this->session->userdata('branchcode');
      	$groupcode=0;
 		 
-		//$id=$this->session->userdata('agentid');
 	    $this->db->select('ac_name,ac_code,groupname,accmasaccounts.opn_bal as opnbal,address,
 			contactno as mobileno,accmasaccounts.tot_dr as totdr,accmasaccounts.tot_cr as totcr,accmasaccounts.clos_bal as closbal');  
 		//$this->db->where('comp_id', $id);
@@ -551,7 +554,8 @@ class Accounts extends CI_Controller {
 	}//getaccbillingreceipt
 	public function receiptentry()
 	{
-		
+		echo's'.$admin = $this->session->userdata('branchcode');
+	//	echo $admin = $this->session->userdata('admin');
 		if(!empty($_POST["monthn"])) 
 		 {  
  		    $groupcode=$_POST["monthn"];		   
@@ -1233,5 +1237,5 @@ class Accounts extends CI_Controller {
 		
 	
 }
-?>
+
 
